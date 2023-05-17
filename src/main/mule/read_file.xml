@@ -16,6 +16,15 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:listener doc:name="Listener" doc:id="70173fd7-e3cc-4768-8e1c-9c845b652cf6" config-ref="HTTP_Listener_config" path="/api"/>
 		<flow-ref doc:name="Flow Reference" doc:id="cd65dfd6-2bb6-41be-a10e-f274993ce534" name="read_fileFlow1"/>
 		<logger level="INFO" doc:name="Logger" doc:id="0ee721d0-dea2-444a-bf8b-e18688129337" message="File read/read fail" />
+		<ee:transform doc:name="Transform Message" doc:id="621dbab1-f510-4583-b72e-17717de3c324" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 	<flow name="read_fileFlow1" doc:id="1290c4c8-1295-4c98-bda4-0407e8fc36eb" >
 		<file:read doc:name="Read" doc:id="e9efb107-803d-430e-bfe3-513b1d7c0a73" config-ref="File_Config" path="C:\Users\mule_\OneDrive\Desktop\tmp\test.txt" />
@@ -37,18 +46,18 @@ output application/json
 			</otherwise>
 		</choice>
 		<error-handler >
-			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="34953850-a07b-4670-8e95-757d6b0a5252" type="FILE:ILLEGAL_PATH">
+<!-- [STUDIO:"On Error Continue"]			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="34953850-a07b-4670-8e95-757d6b0a5252" type="FILE:ILLEGAL_PATH">
 				<ee:transform doc:name="Transform Message" doc:id="7270ed55-d469-411b-a0b3-a78a0f1a8d78" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
----
+&#45;&#45;-
 {
 	"Error": "File not found."
-}]]></ee:set-payload>
+}&#93;&#93;></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-			</on-error-continue>
+			</on-error-continue> [STUDIO] -->
 			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a86aecca-47f5-47bd-b5b7-2c3087277221" type="TEST_FILE:SIZE_TOO_LARGE">
 				<ee:transform doc:name="Transform Message" doc:id="e647d8de-97aa-4cee-8865-495fa35a9310" >
 					<ee:message >

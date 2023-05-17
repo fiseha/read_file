@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="dd2789b0-9289-46c4-b275-baa642533e3d" >
+		<http:listener-connection host="0.0.0.0" port="8088" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="f3ed9972-90c7-44ea-aeba-a8510a18af89" >
+		<file:connection workingDir="C:\Users\mule_\OneDrive\Desktop\tmp" />
+	</file:config>
+	<flow name="read_fileFlow" doc:id="6ec062df-4fcd-4a18-9878-038a1e11314a" >
+		<http:listener doc:name="Listener" doc:id="70173fd7-e3cc-4768-8e1c-9c845b652cf6" config-ref="HTTP_Listener_config" path="/api"/>
+		<flow-ref doc:name="Flow Reference" doc:id="cd65dfd6-2bb6-41be-a10e-f274993ce534" name="read_fileFlow1"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0ee721d0-dea2-444a-bf8b-e18688129337" message="File read/read fail" />
+	</flow>
+	<flow name="read_fileFlow1" doc:id="1290c4c8-1295-4c98-bda4-0407e8fc36eb" >
+		<file:read doc:name="Read" doc:id="e9efb107-803d-430e-bfe3-513b1d7c0a73" config-ref="File_Config" path="C:\Users\mule_\OneDrive\Desktop\tmp\test.txt" />
+		<choice doc:name="Choice" doc:id="575cd8a2-2c08-4ff7-88e3-0fd68022f5b4" >
+			<when expression="#[sizeOf(payload) &gt; 20]">
+				<raise-error doc:name="Raise error" doc:id="ae33d14c-4178-48a1-b3e5-4a4452a13446" type="TEST_FILE:SIZE_TOO_LARGE" description="File is more than 20 characters long. Error."/>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="0ff643a0-06e6-4b8e-bae6-123cae3b3e31">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"content": payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="34953850-a07b-4670-8e95-757d6b0a5252" type="FILE:ILLEGAL_PATH">
+				<ee:transform doc:name="Transform Message" doc:id="7270ed55-d469-411b-a0b3-a78a0f1a8d78" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Error": "File not found."
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a86aecca-47f5-47bd-b5b7-2c3087277221" type="TEST_FILE:SIZE_TOO_LARGE">
+				<ee:transform doc:name="Transform Message" doc:id="e647d8de-97aa-4cee-8865-495fa35a9310" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error": "File size too long. Error"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

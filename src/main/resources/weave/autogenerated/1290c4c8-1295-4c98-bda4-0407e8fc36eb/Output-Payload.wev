@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_1290c4c8_1295_4c98_bda4_0407e8fc36eb_Output_Payload = {| content: Binary |}
+

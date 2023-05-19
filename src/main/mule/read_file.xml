@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:listener-connection host="0.0.0.0" port="8088" />
 	</http:listener-config>
 	<file:config name="File_Config" doc:name="File Config" doc:id="f3ed9972-90c7-44ea-aeba-a8510a18af89" >
-		<file:connection workingDir="C:\Users\mule_\OneDrive\Desktop\tmp" />
+		<file:connection workingDir="C:\Users\SEBLI\AnypointStudio\studio-workspace\read_file\src\main\resources" />
 	</file:config>
 	<flow name="EntryFlow" doc:id="6ec062df-4fcd-4a18-9878-038a1e11314a" >
 		<http:listener doc:name="Listener" doc:id="70173fd7-e3cc-4768-8e1c-9c845b652cf6" config-ref="HTTP_Listener_config" path="/api"/>

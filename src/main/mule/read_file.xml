@@ -12,53 +12,30 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<file:config name="File_Config" doc:name="File Config" doc:id="f3ed9972-90c7-44ea-aeba-a8510a18af89" >
 		<file:connection workingDir="C:\Users\mule_\OneDrive\Desktop\tmp" />
 	</file:config>
-	<flow name="read_fileFlow" doc:id="6ec062df-4fcd-4a18-9878-038a1e11314a" >
+	<flow name="EntryFlow" doc:id="6ec062df-4fcd-4a18-9878-038a1e11314a" >
 		<http:listener doc:name="Listener" doc:id="70173fd7-e3cc-4768-8e1c-9c845b652cf6" config-ref="HTTP_Listener_config" path="/api"/>
-		<flow-ref doc:name="Flow Reference" doc:id="cd65dfd6-2bb6-41be-a10e-f274993ce534" name="read_fileFlow1"/>
-		<logger level="INFO" doc:name="Logger" doc:id="0ee721d0-dea2-444a-bf8b-e18688129337" message="File read/read fail" />
-		<ee:transform doc:name="Transform Message" doc:id="621dbab1-f510-4583-b72e-17717de3c324" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-{
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
+		<flow-ref doc:name="Flow Reference" doc:id="cd65dfd6-2bb6-41be-a10e-f274993ce534" name="ProcessFlow"/>
 	</flow>
-	<flow name="read_fileFlow1" doc:id="1290c4c8-1295-4c98-bda4-0407e8fc36eb" >
-		<file:read doc:name="Read" doc:id="e9efb107-803d-430e-bfe3-513b1d7c0a73" config-ref="File_Config" path="C:\Users\mule_\OneDrive\Desktop\tmp\test.txt" />
+	<flow name="ProcessFlow" doc:id="1290c4c8-1295-4c98-bda4-0407e8fc36eb" >
+		<file:read doc:name="Read" doc:id="e9efb107-803d-430e-bfe3-513b1d7c0a73" config-ref="File_Config" path="_test.txt" />
 		<choice doc:name="Choice" doc:id="575cd8a2-2c08-4ff7-88e3-0fd68022f5b4" >
-			<when expression="#[sizeOf(payload) &gt; 20]">
-				<raise-error doc:name="Raise error" doc:id="ae33d14c-4178-48a1-b3e5-4a4452a13446" type="TEST_FILE:SIZE_TOO_LARGE" description="File is more than 20 characters long. Error."/>
+			<when expression="#[sizeOf(payload) == 0]">
+				<raise-error doc:name="Raise error" doc:id="ae33d14c-4178-48a1-b3e5-4a4452a13446" type="TEST_FILE:SIZE_EMPTY" description="File is more than 20 characters long. Error."/>
 			</when>
 			<otherwise >
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="d48bc273-ec36-4242-984a-4b0f05cce906" mimeType="application/json"/>
 				<ee:transform doc:name="Transform Message" doc:id="0ff643a0-06e6-4b8e-bae6-123cae3b3e31">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{
-	"content": payload
-}]]></ee:set-payload>
+payload.eyeColor]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 			</otherwise>
 		</choice>
 		<error-handler >
-<!-- [STUDIO:"On Error Continue"]			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="34953850-a07b-4670-8e95-757d6b0a5252" type="FILE:ILLEGAL_PATH">
-				<ee:transform doc:name="Transform Message" doc:id="7270ed55-d469-411b-a0b3-a78a0f1a8d78" >
-					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
-&#45;&#45;-
-{
-	"Error": "File not found."
-}&#93;&#93;></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-			</on-error-continue> [STUDIO] -->
-			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a86aecca-47f5-47bd-b5b7-2c3087277221" type="TEST_FILE:SIZE_TOO_LARGE">
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a86aecca-47f5-47bd-b5b7-2c3087277221" type="TEST_FILE:SIZE_EMPTY">
 				<ee:transform doc:name="Transform Message" doc:id="e647d8de-97aa-4cee-8865-495fa35a9310" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0

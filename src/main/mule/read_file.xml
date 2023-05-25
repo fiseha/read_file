@@ -21,6 +21,8 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		<http:listener doc:name="Listener" doc:id="70173fd7-e3cc-4768-8e1c-9c845b652cf6" config-ref="HTTP_Listener_config" path="/api"/>
 		<flow-ref doc:name="Flow Reference" doc:id="cd65dfd6-2bb6-41be-a10e-f274993ce534" name="ProcessFlow"/>
 	</flow>
+	<flow name="read_fileFlow" doc:id="a9279182-b685-4f10-8326-03c24943ea7f" >
+	</flow>
 	<flow name="ProcessFlow" doc:id="1290c4c8-1295-4c98-bda4-0407e8fc36eb" >
 		<file:read doc:name="Read" doc:id="e9efb107-803d-430e-bfe3-513b1d7c0a73" config-ref="File_Config" path="_test.txt" />
 		<choice doc:name="Choice" doc:id="575cd8a2-2c08-4ff7-88e3-0fd68022f5b4">
@@ -69,6 +71,7 @@ output application/json
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
+				<logger level="INFO" doc:name="dummy Logger" doc:id="3fcd2f45-4a40-4338-aaa7-76590e5da640" />
 			
 </otherwise>
 		</choice>
@@ -80,7 +83,7 @@ output application/json
 output application/json
 ---
 {
-	"error": "File size too long. Error"
+	"error": "File size too long. Error display"
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>

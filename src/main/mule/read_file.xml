@@ -1,38 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
-http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="dd2789b0-9289-46c4-b275-baa642533e3d" >
-		<http:listener-connection host="0.0.0.0" port="8088" />
+		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<file:config name="File_Config" doc:name="File Config" doc:id="f3ed9972-90c7-44ea-aeba-a8510a18af89" >
-		<file:connection workingDir="C:\Users\SEBLI\AnypointStudio\studio-workspace\read_file\src\main\resources" />
+		<file:connection workingDir="C:\Users\me\OneDrive\Desktop\read_file\src\main\resources" />
+
 	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="0c50c412-3439-42b3-b660-99c7e4755377" >
+		<db:mssql-connection host="localhost" instanceName="Fiseha's Server" port="1433" user="sa" password="Fiseha12!" databaseName="mule" />
+	</db:config>
 	<flow name="EntryFlow" doc:id="6ec062df-4fcd-4a18-9878-038a1e11314a" >
 		<http:listener doc:name="Listener" doc:id="70173fd7-e3cc-4768-8e1c-9c845b652cf6" config-ref="HTTP_Listener_config" path="/api"/>
 		<flow-ref doc:name="Flow Reference" doc:id="cd65dfd6-2bb6-41be-a10e-f274993ce534" name="ProcessFlow"/>
 	</flow>
 	<flow name="ProcessFlow" doc:id="1290c4c8-1295-4c98-bda4-0407e8fc36eb" >
 		<file:read doc:name="Read" doc:id="e9efb107-803d-430e-bfe3-513b1d7c0a73" config-ref="File_Config" path="_test.txt" />
-		<choice doc:name="Choice" doc:id="575cd8a2-2c08-4ff7-88e3-0fd68022f5b4" >
+		<choice doc:name="Choice" doc:id="575cd8a2-2c08-4ff7-88e3-0fd68022f5b4">
 			<when expression="#[sizeOf(payload) == 0]">
-				<raise-error doc:name="Raise error" doc:id="ae33d14c-4178-48a1-b3e5-4a4452a13446" type="TEST_FILE:SIZE_EMPTY" description="File is more than 20 characters long. Error."/>
+				<raise-error doc:name="Raise error" doc:id="ae33d14c-4178-48a1-b3e5-4a4452a13446" type="TEST_FILE:SIZE_EMPTY" description="File is more than 20 characters long. Error." />
 			</when>
-			<otherwise >
-				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="d48bc273-ec36-4242-984a-4b0f05cce906" mimeType="application/json"/>
-				<ee:transform doc:name="Transform Message" doc:id="0ff643a0-06e6-4b8e-bae6-123cae3b3e31">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+			<otherwise>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="d48bc273-ec36-4242-984a-4b0f05cce906" mimeType="application/json" />
+				<db:select doc:name="Select" doc:id="9a909357-ff5a-4568-bf07-64f9dc8490bd" config-ref="Database_Config">
+					<db:sql ><![CDATA[SELECT * FROM person WHERE eyeColor = 'Green';]]></db:sql>
+				</db:select>
+				<db:insert doc:name="Insert" doc:id="b10c85c2-a0cb-433d-81e2-b21915a9a998" config-ref="Database_Config">
+					<db:sql ><![CDATA[INSERT INTO person(_id, balance, age, eyeColor, gender, company, phone)
+VALUES(:id, :b, 35, 'Black', 'Female', 'Zsmart', :p);]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	"id": 1,
+	b: 125,
+	p: '+2514878787'
+}]]]></db:input-parameters>
+				</db:insert>
+				<db:bulk-insert doc:name="Bulk insert" doc:id="b0dd1a4d-021d-4b4a-bf05-e081c4d0124a" config-ref="Database_Config">
+					<db:sql><![CDATA[INSERT INTO person(_id, balance, age, eyeColor, gender, company, phone)
+VALUES(:_id, :balance, :age, :eyeColor, :gender, :company, :phone);]]></db:sql>
+				</db:bulk-insert>
+				<db:update doc:name="Update" doc:id="d34444d1-7b53-49bf-961f-249c5f744411" config-ref="Database_Config">
+					<db:sql ><![CDATA[UPDATE person set balance = 10000
+WHERE gender = :gender]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	"gender" : "female"
+	}]]]></db:input-parameters>
+				</db:update>
+				<db:delete doc:name="Delete" doc:id="fc95f720-6b14-4e41-9390-f33c996741aa" config-ref="Database_Config">
+					<db:sql ><![CDATA[delete from person
+where eyeColor = :ec]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	ec: 'Blue'
+}]]]></db:input-parameters>
+				</db:delete>
+				<ee:transform doc:name="Transform Message" doc:id="15680409-d6c0-4132-b91a-d3cbc6113926" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload.eyeColor]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-			</otherwise>
+{
+	"result": payload
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</otherwise>
 		</choice>
 		<error-handler >
 			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a86aecca-47f5-47bd-b5b7-2c3087277221" type="TEST_FILE:SIZE_EMPTY">

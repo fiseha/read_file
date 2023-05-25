@@ -18,3 +18,5 @@ w3schools.com/sql
 
 Software
 dbeaver
+
+Github desktop

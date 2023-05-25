@@ -1,0 +1,22 @@
+CREATE TABLE person(
+	_id nvarchar(100),
+	balance nvarchar(100),
+	age nvarchar(100),
+	eyeColor nvarchar(20),
+	gender nvarchar(20),
+	company nvarchar(20),
+	phone nvarchar(20)
+);
+
+SELECT * FROM person;
+
+INSERT INTO person(_id, balance, age, eyeColor, gender, company, phone)
+VALUES('646580878a6e', 1187.60,25, 'Black', 'Female', 'Zsmart', '+15474584');
+
+resource
+w3schools.com/sql
+
+Software
+dbeaver
+
+Github desktop

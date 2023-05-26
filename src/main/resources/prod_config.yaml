@@ -1,0 +1,10 @@
+file:
+  path: "_test.txt"
+
+db:
+  db_name: "mule_prod"
+  host: "localhost"
+  port: "1433"
+  table: "mule"
+  username: "sa"
+  password: "![y0T643u5Fut2WkvOhdV41g==]"
